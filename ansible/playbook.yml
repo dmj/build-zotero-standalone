@@ -1,0 +1,93 @@
+---
+- hosts: default
+  tasks:
+    - name: Enable https transport for apt
+      become: true
+      apt:
+        name: apt-transport-https
+        state: present
+    - name: Add public key of nodesource repository
+      become: true
+      apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+        state: present
+    - name: Add nodesource repository
+      become: true
+      copy:
+        src: config/nodesource.list
+        dest: /etc/apt/sources.list.d/nodesource.list
+    - name: Install NodeJS
+      become: true
+      apt:
+        name: nodejs
+        update_cache: yes
+        state: present
+    - name: Install Zotero repository, part 1
+      git:
+        repo: https://github.com/zotero/zotero
+        dest: /home/vagrant/zotero-client
+        force: yes
+    - name: Install Zotero repository, part 2
+      git:
+        repo: https://github.com/zotero/zotero-build
+        dest: /home/vagrant/zotero-build
+        force: yes
+    - name: Install Zotero repository, part 3
+      git:
+        repo: https://github.com/zotero/zotero-standalone-build
+        dest: /home/vagrant/zotero-standalone-build
+        force: yes
+    - name: Install NodeJS modules
+      shell: |
+        npm i
+        npm run build
+      args:
+        chdir: /home/vagrant/zotero-client
+    - name: Install required tools
+      become: true
+      apt:
+        name: [zip, unzip]
+        state: present
+    - name: Install custom script
+      copy:
+        src: files/copy_runtime.sh
+        dest: /home/vagrant/zotero-standalone-build
+        mode: 0755
+    - name: Clean runtime
+      file:
+        state: absent
+        path: /home/vagrant/zotero-standalone-build/xulrunner
+    - name: Copy runtime
+      copy:
+        src: /usr/lib/palemoon
+        dest: /home/vagrant/zotero-standalone-build/xulrunner
+    - name: Rename runtime
+      shell: |
+        mv /home/vagrant/zotero-standalone-build/xulrunner/palemoon /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64
+        mv /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64/palemoon /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64/firefox
+        mv /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64/palemoon-bin /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64/firefox-bin
+    - name: Prepare runtime
+      shell: |
+        ./copy_runtime.sh
+      args:
+        chdir: /home/vagrant/zotero-standalone-build
+    - name: Fetch pdftools
+      shell: |
+        ./fetch_pdftools
+      args:
+        chdir: /home/vagrant/zotero-standalone-build
+    - name: Patch build files
+      patch:
+        src: files/build.patch
+        basedir: /home/vagrant/zotero-standalone-build
+    - name: Build client
+      shell: |
+        ./scripts/dir_build
+      args:
+        chdir: /home/vagrant/zotero-standalone-build
+    - name: Patch client
+      patch:
+        src: files/client.patch
+        basedir: /home/vagrant/zotero-standalone-build
+    - name: Copy client
+      command: mv /home/vagrant/zotero-standalone-build/staging /host

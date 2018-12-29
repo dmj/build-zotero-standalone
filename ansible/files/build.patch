@@ -1,0 +1,19 @@
+--- build.sh.orig	2018-12-29 09:27:49.945877328 -0800
++++ build.sh	2018-12-29 09:28:18.605877328 -0800
+@@ -480,7 +480,7 @@
+ 
+ # Linux
+ if [ $BUILD_LINUX == 1 ]; then
+-	for arch in "i686" "x86_64"; do
++	for arch in "x86_64"; do
+ 		RUNTIME_PATH=`eval echo '$LINUX_'$arch'_RUNTIME_PATH'`
+ 		
+ 		# Set up directory
+@@ -494,6 +494,7 @@
+ 		
+ 		# Use our own launcher that calls the original Firefox executable with -app
+ 		mv "$APPDIR"/firefox "$APPDIR"/zotero-bin
++		chmod +x "$APPDIR"/zotero-bin
+ 		cp "$CALLDIR/linux/zotero" "$APPDIR"/zotero
+ 		
+ 		# Copy Ubuntu launcher files

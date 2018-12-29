@@ -1,0 +1,11 @@
+--- staging/Zotero_linux-x86_64/application.ini.orig	2018-12-29 08:27:12.079410872 -0800
++++ staging/Zotero_linux-x86_64/application.ini	2018-12-29 08:27:23.567410872 -0800
+@@ -7,7 +7,7 @@
+ ID=zotero@chnm.gmu.edu
+ 
+ [Gecko]
+-MinVersion=52.0
++MinVersion=0.*
+ MaxVersion=54.*
+ 
+ [XRE]
