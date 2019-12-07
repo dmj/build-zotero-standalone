@@ -59,13 +59,11 @@
         path: /home/vagrant/zotero-standalone-build/xulrunner
     - name: Copy runtime
       copy:
-        src: /usr/lib/palemoon
+        src: /usr/lib/firefox
         dest: /home/vagrant/zotero-standalone-build/xulrunner
     - name: Rename runtime
       shell: |
-        mv /home/vagrant/zotero-standalone-build/xulrunner/palemoon /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64
-        mv /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64/palemoon /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64/firefox
-        mv /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64/palemoon-bin /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64/firefox-bin
+        mv /home/vagrant/zotero-standalone-build/xulrunner/firefox /home/vagrant/zotero-standalone-build/xulrunner/firefox-x86_64
     - name: Prepare runtime
       shell: |
         ./copy_runtime.sh
@@ -85,9 +83,5 @@
         ./scripts/dir_build
       args:
         chdir: /home/vagrant/zotero-standalone-build
-    - name: Patch client
-      patch:
-        src: files/client.patch
-        basedir: /home/vagrant/zotero-standalone-build
     - name: Copy client
       command: mv /home/vagrant/zotero-standalone-build/staging /host
